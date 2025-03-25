@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pkl
+*.env
+*.sqlite3
+.DS_Store
+
+# Virtual environment
+venv/
+.env/
+
+# VSCode
+.vscode/
+
+# Mac OS
+.DS_Store
+
+# Node.js (frontend)
+node_modules/
+npm-debug.log
+.yarn/
+
+# Next.js build
+.next/
+out/
+
+# Logs
+*.log
+
+# ENVファイル
+*.env
