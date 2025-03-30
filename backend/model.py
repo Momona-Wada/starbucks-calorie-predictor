@@ -1,3 +1,5 @@
+import json
+
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score, mean_absolute_error
@@ -15,6 +17,9 @@ base_features = ["Calories", "Sugars (g)", "Protein (g)", "Total Fat (g)", "Caff
 dummy_features = [col for col in df_encoded.columns if col.startswith(("Size_", "Milk_Type_", "Whipped_Cream_"))]
 
 features = base_features + dummy_features
+with open("model_features.json", "w") as f:
+    json.dump(features, f)
+
 X = df_encoded[features]
 y = df_encoded["score"]
 
