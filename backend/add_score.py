@@ -1,4 +1,30 @@
+import re
+
 import pandas as pd
+
+def parse_beverage_prep(bp):
+    sizes = ["Short", "Tall", "Grande", "Venti"]
+    bp = str(bp).strip()
+    size = None
+    milk = bp
+    for s in sizes:
+        if bp.startswith(s):
+            size = s
+            milk = bp[len(s):].strip()
+            break
+    return size, milk
+
+def parse_whipped_cream(beverage):
+    beverage = str(beverage)
+    if "(" in beverage and ")" in beverage:
+        if "Without Whipped Cream" in beverage:
+            return False
+        elif "With Whipped Cream" in beverage:
+            return True
+    return False
+
+def clean_beverage_name(beverage):
+    return re.sub(r"\s*\(.*Whipped Cream.*\)", "", beverage, flags=re.IGNORECASE).strip()
 
 def calculate_score(row):
     score = 100
@@ -46,6 +72,27 @@ def calculate_score(row):
     elif calcium >= 10:
         score += 5
 
+    if row.get("Whipped_Cream", False):
+        score -= 5
+
+    milk = str(row.get("Milk_Type", "")).lower()
+    if "soy" in milk:
+        score += 3
+    elif "nonfat" in milk:
+        score += 3
+    elif "2%" in milk:
+        score += 1
+    elif "whole" in milk:
+        score -= 3
+
+    size = row.get("Size", "")
+    if size == "Venti":
+        score -= 5
+    elif size == "Grande":
+        score -= 3
+    elif size == "Short":
+        score += 2
+
     score = max(0, min(100, score)) # 0 - 100
     return score
 
@@ -53,10 +100,19 @@ pd.set_option("display.max_columns", None)
 pd.set_option("display.width", 1000)
 
 df = pd.read_csv("starbucks.csv")
-
 df.columns = [col.strip() for col in df.columns]
 
-for col in ["Calories", "Sugars (g)", "Protein (g)", "Total Fat (g)", "Caffeine (mg)", "Calcium (% DV)"]:
+# create 'Size' and 'Milk_Type' columns from 'Beverage_prep'
+df["Size"], df["Milk_Type"] = zip(*df["Beverage_prep"].apply(parse_beverage_prep))
+
+# create 'Whipped_Cream' column from 'Beverage'
+df["Whipped_Cream"] = df["Beverage"].apply(parse_whipped_cream)
+
+# remove whipped cream info from 'Beverage'
+df["Beverage"] = df["Beverage"].apply(clean_beverage_name)
+
+numeric_cols = ["Calories", "Sugars (g)", "Protein (g)", "Total Fat (g)", "Caffeine (mg)", "Calcium (% DV)"]
+for col in numeric_cols:
     df[col] = (
         df[col]
         .astype(str)

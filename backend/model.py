@@ -8,9 +8,15 @@ pd.set_option("display.max_columns", None)
 pd.set_option("display.width", 1000)
 df = pd.read_csv("labeled_starbucks.csv")
 
-features = ["Calories", "Sugars (g)", "Protein (g)", "Total Fat (g)", "Caffeine (mg)", "Calcium (% DV)"]
-X = df[features]
-y = df["score"]
+categorical_cols = ["Size", "Milk_Type", "Whipped_Cream"]
+df_encoded = pd.get_dummies(df, columns=categorical_cols)
+
+base_features = ["Calories", "Sugars (g)", "Protein (g)", "Total Fat (g)", "Caffeine (mg)", "Calcium (% DV)"]
+dummy_features = [col for col in df_encoded.columns if col.startswith(("Size_", "Milk_Type_", "Whipped_Cream_"))]
+
+features = base_features + dummy_features
+X = df_encoded[features]
+y = df_encoded["score"]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
