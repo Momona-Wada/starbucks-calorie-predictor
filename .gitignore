@@ -1,32 +1,52 @@
-# Python
+# ====================
+# 📦 Python / Backend
+# ====================
 __pycache__/
 *.py[cod]
 *.pkl
-*.env
 *.sqlite3
-.DS_Store
-
-# Virtual environment
-venv/
+*.env
 .env/
+venv/
 
-# VSCode
+# ====================
+# 🧪 Logs
+# ====================
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ====================
+# 🧠 VSCode / Editor
+# ====================
 .vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-# Mac OS
+# ====================
+# 🍏 Mac OS
+# ====================
 .DS_Store
 
-# Node.js (frontend)
+# ====================
+# 🧑‍💻 Node.js / Frontend
+# ====================
 node_modules/
-npm-debug.log
-.yarn/
+dist/
+dist-ssr/
+*.local
 
-# Next.js build
+# ====================
+# ⚙️ Next.js (今は未使用だけど念のため)
+# ====================
 .next/
 out/
-
-# Logs
-*.log
-
-# ENVファイル
-*.env

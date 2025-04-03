@@ -1,19 +1,36 @@
 import json
 from schemas.drink_request import DrinkRequest
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 import pandas as pd
 import joblib
 
 app = FastAPI()
 
+# load model for score
 model = joblib.load("model.pkl")
 with open("model_features.json") as f:
     all_features = json.load(f)
 
+# load text classification model and label
+text_model = joblib.load("text_model.pkl")
+with open("mlb_classes.json") as f:
+    mlb_classes = json.load(f)
+
+# load dataset
 base_features = ["Calories", "Sugars (g)", "Protein (g)", "Total Fat (g)", "Caffeine (mg)", "Calcium (% DV)"]
 df = pd.read_csv("labeled_starbucks.csv")
 df.columns = [col.strip() for col in df.columns]
 
+def preprocess_text(text):
+    text = text.lower()
+    synonyms = {
+        "calories": "calorie",
+        "low calorie": "low_calorie",
+        "low-calorie": "low_calorie"
+    }
+    for key, val in synonyms.items():
+        text = text.replace(key, val)
+    return text
 
 def compute_score(row: pd.Series) -> float:
     X_base = row[base_features].to_dict()
@@ -112,7 +129,6 @@ def predict_score(request: DrinkRequest):
     return response
 
 
-
 @app.get("/suggest_alternatives")
 def suggest_alternatives(category: str = Query(...), top_n: int = Query(3)):
     try:
@@ -126,4 +142,38 @@ def suggest_alternatives(category: str = Query(...), top_n: int = Query(3)):
     return {
         "category": category,
         "top_drinks": top_drinks
+    }
+
+@app.get("/recommend_text")
+async def recommend_from_text(request: Request):
+    data = await request.json()
+    user_input = request.get("text", "")
+    if not user_input:
+        raise HTTPException(status_code=400, detail="Missing input text")
+
+    # step 1: predict tag(s)
+    probs = text_model.predict_proba([preprocess_text(user_input)])[0]
+    threshold = 0.3
+    predict_indices = [i for i, p in enumerate(probs) if p >= threshold]
+    predicted_tags = [mlb_classes[i] for i in predict_indices]
+    if not predicted_tags:
+        predicted_tags = ["none"]
+
+    # step 2: search drinks that match the tag(s)
+    matched = df[df["tags"].apply(lambda row_tags: all(tag in row_tags for tag in predicted_tags))] if "tags" in df.columns else pd.DataFrame()
+
+    if matched.empty:
+        partial = df[df["tags"].apply(lambda row_tags: any(
+            tag in row_tags for tag in predicted_tags))] if "tags" in df.columns else pd.DataFrame()
+        top = partial.sort_values(by="score", ascending=False)[["Beverage", "tags", "score"]].head(5)
+        message = "No exact match found. Showing partial matches instead."
+    else:
+        top = matched.sort_values(by="score", ascending=False)[["Beverage", "tags", "score"]].head(5)
+        message = "Here are your best matches!"
+
+    return {
+        "input_text": user_input,
+        "predicted_tags": predicted_tags,
+        "message": message,
+        "recommendations": top.to_dict(orient="records")
     }
