@@ -1,125 +1,144 @@
-import './App.css'
-import './index.css'
+"use client"
+
+import type React from "react"
+import { useState } from "react"
+import { Button } from "./components/ui/button"
+import { Input } from "./components/ui/input"
+import { Coffee, Loader2 } from "lucide-react"
+import { Card, CardContent } from "./components/ui/card"
+import { Badge } from "./components/ui/badge"
 
 function App() {
+  const [userInput, setUserInput] = useState("")
+  const [result, setResult] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const API_URL = "http://127.0.0.1:8000/recommend_text"
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!userInput) return
+
+    setIsLoading(true)
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: userInput }),
+      })
+      const data = await response.json()
+      setResult(data)
+    } catch (error) {
+      console.error("Error calling API:", error)
+      setResult({ error: "Failed to fetch from API" })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-starbucks-cream to-starbucks-light text-starbucks-brown font-sans flex flex-col">
-      {/* Header */}
-      <header className="bg-starbucks-green text-white px-6 py-4 shadow-lg flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Starbucks Gym Checker 🏋️‍♀️</h1>
+    <div className="min-h-screen bg-starbucks-light/30">
+      <header className="bg-starbucks-green text-white py-6 shadow-md">
+        <div className="container mx-auto px-4 flex items-center">
+          <Coffee className="h-8 w-8 mr-3" />
+          <h1 className="text-2xl font-bold">Starbucks Drink Finder</h1>
+        </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-grow flex items-center justify-center py-8 px-4">
-        <div className="w-full max-w-xl bg-white rounded-xl shadow-lg p-8 space-y-6">
-          <h2 className="text-2xl font-semibold text-center text-starbucks-green">
-            Welcome to the Checker!
-          </h2>
-          <p className="text-center text-gray-600">
-            Find out if your drink is gym-approved or a cheat-day treat.
-          </p>
+      <main className="container mx-auto px-4 py-8">
+        <Card className="max-w-3xl mx-auto bg-white shadow-lg border-starbucks-mint/30">
+          <CardContent className="p-6">
+            <p className="text-gray-600 mb-6">
+              Describe what you're in the mood for, and we'll recommend the perfect Starbucks drink for you.
+            </p>
 
-          {/* Form starts here */}
-          <form className="space-y-4">
-            {/* Drink Type */}
-              <div className="flex items-center gap-4">
-                <label htmlFor="drinkType" className="w-1/3 text-sm font-medium text-gray-700">
-                  Drink Type
-                </label>
-                <select
-                  id="drinkType"
-                  className="w-2/3 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-starbucks-green"
-                >
-                  <option value="">Please select</option>
-                  <option value="coffee">Coffee</option>
-                  <option value="latte">Latte</option>
-                  <option value="frappuccino">Frappuccino</option>
-                  <option value="espresso">Espresso</option>
-                </select>
-              </div>
-
-              {/* Size */}
-              <div className="flex items-center gap-4">
-                <label htmlFor="drinkSize" className="w-1/3 text-sm font-medium text-gray-700">
-                  Size
-                </label>
-                <select
-                  id="drinkSize"
-                  className="w-2/3 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-starbucks-green"
-                >
-                  <option value="">Please select</option>
-                  <option value="short">Short</option>
-                  <option value="tall">Tall</option>
-                  <option value="grande">Grande</option>
-                  <option value="venti">Venti</option>
-                </select>
-              </div>
-
-              {/* Milk Type */}
-              <div className="flex items-center gap-4">
-                <label htmlFor="milkType" className="w-1/3 text-sm font-medium text-gray-700">
-                  Milk Type
-                </label>
-                <select
-                  id="milkType"
-                  className="w-2/3 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-starbucks-green"
-                >
-                  <option value="">Please select</option>
-                  <option value="regular">Regular</option>
-                  <option value="soy">Soy</option>
-                  <option value="almond">Almond</option>
-                  <option value="oat">Oat</option>
-                </select>
-              </div>
-
-              {/* Whipped Cream */}
-              <div className="flex items-center gap-4">
-                <span className="w-1/3 text-sm font-medium text-gray-700">
-                  Whipped Cream
-                </span>
-                <div className="w-2/3 flex items-center space-x-6">
-                  <label className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      name="whip"
-                      value="with"
-                      className="form-radio text-starbucks-green focus:ring-starbucks-green"
-                    />
-                    <span className="ml-2 text-gray-700">Yes</span>
-                  </label>
-                  <label className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      name="whip"
-                      value="without"
-                      className="form-radio text-starbucks-green focus:ring-starbucks-green"
-                    />
-                    <span className="ml-2 text-gray-700">No</span>
-                  </label>
-                </div>
-              </div>
-
-
-            {/* Submit Button */}
-            <div className="flex justify-center pt-4">
-              <button
+            <form onSubmit={handleSubmit} className="flex gap-2 mb-8">
+              <Input
+                type="text"
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                placeholder="I want something sweet and refreshing..."
+                className="flex-grow border-starbucks-mint focus-visible:ring-starbucks-green"
+              />
+              <Button
                 type="submit"
-                className="px-6 py-2 bg-starbucks-green text-white rounded-full hover:bg-starbucks-highlight transition duration-300"
+                className="bg-starbucks-green hover:bg-starbucks-green/90 text-white"
+                disabled={isLoading}
               >
-                Check Your Drink
-              </button>
-            </div>
-          </form>
-          {/* Form ends here */}
-        </div>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Finding...
+                  </>
+                ) : (
+                  "Get Recommendations"
+                )}
+              </Button>
+            </form>
+
+            {result && (
+              <div className="mt-6">
+                {result.error && <div className="p-4 bg-red-50 text-red-700 rounded-md">Error: {result.error}</div>}
+
+                {!result.error && (
+                  <>
+                    <div className="mb-4 p-4 bg-starbucks-light rounded-md">
+                      <p className="font-medium text-starbucks-green">{result.message}</p>
+                    </div>
+
+                    {result.recommendations && result.recommendations.length > 0 ? (
+                      <div className="grid gap-4 md:grid-cols-2">
+                        {result.recommendations.map((item: any, index: number) => (
+                          <Card
+                            key={index}
+                            className="overflow-hidden border-starbucks-mint/20 hover:shadow-md transition-shadow"
+                          >
+                            <div className="bg-starbucks-mint/20 p-3 border-b border-starbucks-mint/20">
+                              <h3 className="font-bold text-starbucks-green">{item.Beverage}</h3>
+                            </div>
+                            <CardContent className="p-4">
+                              <div className="flex flex-wrap gap-2 mb-2">
+                                {item.tags &&
+                                  Array.isArray(item.tags) &&
+                                  item.tags.map((tag: string, tagIndex: number) => (
+                                    <Badge
+                                      key={tagIndex}
+                                      variant="outline"
+                                      className="bg-starbucks-cream border-starbucks-mint text-starbucks-brown"
+                                    >
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                              </div>
+                              {item.score !== undefined && (
+                                <div className="mt-2 text-sm text-gray-500">
+                                  Match score:{" "}
+                                  <span className="font-medium text-starbucks-green">{item.score.toFixed(2)}</span>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-center py-4 text-gray-500">
+                        No recommendations found. Try a different description.
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-100 text-center text-sm text-gray-600 py-4">
-        © {new Date().getFullYear()} Starbucks Gym Checker. All rights reserved.
+      <footer className="mt-auto py-4 text-center text-sm text-gray-500">
+        <p>Powered by AI • Find your perfect Starbucks drink</p>
       </footer>
     </div>
   )
 }
 
 export default App
+

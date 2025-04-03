@@ -3,11 +3,20 @@ import joblib
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Query
 
-from schemas.drink_request import DrinkRequest
 from schemas.recommend_text import RecommendTextRequest
 from text_preprocessor import preprocess_text
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 # === load model for score
 model = joblib.load("model.pkl")
@@ -37,58 +46,6 @@ def compute_score(row: pd.Series) -> float:
     X_df = pd.DataFrame([X_full])[all_features]
     return model.predict(X_df)[0]
 
-def get_drink_row(request) -> pd.Series:
-    filtered = df[
-        (df["Beverage"] == request.beverage) &
-        (df["Size"] == request.size) &
-        (df["Milk_Type"] == request.milk) &
-        (df["Whipped_Cream"] == request.whipped_cream)
-    ]
-    return filtered.iloc[0] if not filtered.empty else None
-
-@app.post("/predict")
-def predict_score(request: DrinkRequest):
-    row = get_drink_row(request)
-    if row is None:
-        raise HTTPException(status_code=404, detail="Cannot find the drink")
-
-    original_score = compute_score(row)
-    if original_score >= 80:
-        message = "✅ Good after workout!"
-    elif original_score >= 60:
-        message = "🤔 Hmm... maybe okay!"
-    else:
-        message = "🍰 Save it for cheat day!"
-
-    # ... 省略せずに貼る
-    same_beverage_df = df[df["Beverage"] == request.beverage].copy()
-    same_beverage_df["pred_score"] = same_beverage_df.apply(compute_score, axis=1)
-    better_df = same_beverage_df[same_beverage_df["pred_score"] > original_score]
-    if not better_df.empty:
-        better_df["score_diff"] = better_df["pred_score"] - original_score
-        top3 = better_df.sort_values("score_diff").head(3)
-        suggestions = []
-        for _, row_sug in top3.iterrows():
-            suggestions.append({
-                "beverage": row_sug["Beverage"],
-                "size": row_sug["Size"],
-                "milk": row_sug["Milk_Type"],
-                "whipped_cream": bool(row_sug["Whipped_Cream"]),
-                "score": round(row_sug["pred_score"], 2)
-            })
-    else:
-        suggestions = None
-
-    response = {
-        "score": round(original_score, 2),
-        "message": message,
-        "input": request.model_dump(),
-        "suggestions": suggestions
-    }
-    if not suggestions:
-        response["note"] = "😕 No better version of this drink was found."
-    return response
-
 @app.post("/recommend_text")
 def recommend_from_text(body: RecommendTextRequest):
     user_input = body.text
@@ -112,6 +69,7 @@ def recommend_from_text(body: RecommendTextRequest):
 
     if matched.empty:
         partial = df[df["tags"].apply(lambda row_tags: any(tag in row_tags for tag in predicted_tags))]
+
         if partial.empty:
             return {
                 "input_text": user_input,
@@ -121,12 +79,17 @@ def recommend_from_text(body: RecommendTextRequest):
             }
         if "score" not in partial.columns:
             partial["score"] = partial.apply(compute_score, axis=1)
-        top = partial.sort_values(by="score", ascending=False)[["Beverage", "tags", "score"]].head(5)
+
+        partial = partial.sort_values(by="score", ascending=False)
+        partial = partial.drop_duplicates(subset="Beverage", keep="first")
+        top = partial[["Beverage", "tags", "score"]].head(5)
         message = "No exact match found. Showing partial matches instead."
     else:
         if "score" not in matched.columns:
             matched["score"] = matched.apply(compute_score, axis=1)
-        top = matched.sort_values(by="score", ascending=False)[["Beverage", "tags", "score"]].head(5)
+        matched = matched.sort_values(by="score", ascending=False)
+        matched = matched.drop_duplicates(subset="Beverage", keep="first")
+        top = matched[["Beverage", "tags", "score"]].head(5)
         message = "Here are your best matches!"
 
     return {
