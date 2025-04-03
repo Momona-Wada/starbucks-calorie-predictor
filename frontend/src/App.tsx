@@ -36,6 +36,19 @@ function App() {
     }
   }
 
+  const imageMap: Record<string, string> = {
+    "Brewed Coffee": "/images/drinks/brewed_coffee.png",
+    "Cappuccino": "/images/drinks/cappuccino.png",
+    "Ice Brewed Coffee": "/images/drinks/cold_brew.png",
+    "Espresso": "/images/drinks/espresso.png",
+    "Frappuccino": "/images/drinks/moca_frappuccino",
+    "Caffè Latte": "/images/drinks/caffe_latte.png",
+    "White Chocolate Mocha": "/images/drinks/white_chocolate_mocha.png",
+    "Caramel Macchiato": "/images/drinks/caramel_macchiato.png",
+    "Java Chip": "/images/drinks/java_chip.png",
+    "No drinks found at all for these tags": "/images/drinks/no_image_available"
+  }
+
   return (
     <div className="min-h-screen bg-starbucks-light/30">
       <header className="bg-starbucks-green text-white py-6 shadow-md">
@@ -93,6 +106,11 @@ function App() {
                             key={index}
                             className="overflow-hidden border-starbucks-mint/20 hover:shadow-md transition-shadow"
                           >
+                            <img
+                              src={imageMap[item.Beverage] ?? "/images/drinks/no_image_available.png"}
+                                alt={item.Beverage}
+                                className="w-full h-40 object-contain bg-white p-2"
+                            />
                             <div className="bg-starbucks-mint/20 p-3 border-b border-starbucks-mint/20">
                               <h3 className="font-bold text-starbucks-green">{item.Beverage}</h3>
                             </div>
