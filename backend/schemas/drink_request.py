@@ -5,3 +5,4 @@ class DrinkRequest(BaseModel):
     size: str
     milk: str
     whipped_cream: bool
+
