@@ -181,7 +181,26 @@ training_data = [
     ("I want a cheat day treat", ["high_calorie", "sweet"]),
     ("Go big on sugar and calories", ["high_calorie", "sweet"]),
     ("Cheat treat time!", ["high_calorie", "sweet"]),
-
+    ("I want something super unhealthy", ["unhealthy", "sweet"]),
+    ("Give me the unhealthiest thing on the menu", ["unhealthy", "sweet"]),
+    ("I don’t care if it’s unhealthy", ["unhealthy", "sweet"]),
+    ("Forget the health stuff, I want sugar", ["unhealthy", "sweet"]),
+    ("I want a sugary bomb", ["unhealthy", "sweet"]),
+    ("Give me a sugar overload", ["unhealthy", "sweet"]),
+    ("Something indulgent and unhealthy", ["unhealthy", "sweet"]),
+    ("It’s my sugar binge day", ["unhealthy", "sweet"]),
+    ("I want a drink that's terrible for me", ["unhealthy", "sweet"]),
+    ("No health talk, just sweetness", ["unhealthy", "sweet"]),
+    ("I want something sweet and healthy", ["sweet", "low_calorie"]),
+    ("Sweet but still low in calories", ["sweet", "low_calorie"]),
+    ("A guilt-free sweet drink", ["sweet", "low_calorie"]),
+    ("Low calorie and sweet, please", ["sweet", "low_calorie"]),
+    ("Give me a sweet drink that’s not heavy", ["sweet", "low_calorie"]),
+    ("I want to enjoy something sweet without calories", ["sweet", "low_calorie"]),
+    ("Sweet and diet-friendly", ["sweet", "low_calorie"]),
+    ("Low calorie drink with sweetness", ["sweet", "low_calorie"]),
+    ("Something sweet that won’t ruin my diet", ["sweet", "low_calorie"]),
+    ("A healthy sweet treat", ["sweet", "low_calorie"]),
 ]
 texts = [t[0] for t in training_data]
 label_lists = [t[1] for t in training_data]
