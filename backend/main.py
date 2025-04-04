@@ -54,7 +54,7 @@ def recommend_from_text(body: RecommendTextRequest):
 
     # step1: predict tags
     probs = text_model.predict_proba([preprocess_text(user_input)])[0]
-    threshold = 0.3
+    threshold = 0.2
     predicted_indices = [i for i, p in enumerate(probs) if p >= threshold]
     predicted_tags = [mlb_classes[i] for i in predicted_indices]
     if not predicted_tags:

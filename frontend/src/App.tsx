@@ -37,15 +37,16 @@ function App() {
   }
 
   const imageMap: Record<string, string> = {
-    "Brewed Coffee": "/images/drinks/brewed_coffee.png",
+    "Brewed Coffee": "/images/drinks/coffee.png",
     "Cappuccino": "/images/drinks/cappuccino.png",
-    "Ice Brewed Coffee": "/images/drinks/cold_brew.png",
+    "Iced Brewed Coffee (With Milk & Classic Syrup)": "/images/drinks/cold_brew.png",
     "Espresso": "/images/drinks/espresso.png",
     "Frappuccino": "/images/drinks/moca_frappuccino",
     "Caffè Latte": "/images/drinks/caffe_latte.png",
     "White Chocolate Mocha": "/images/drinks/white_chocolate_mocha.png",
     "Caramel Macchiato": "/images/drinks/caramel_macchiato.png",
     "Java Chip": "/images/drinks/java_chip.png",
+    "Coffee":"/images/drinks/coffee.png",
     "No drinks found at all for these tags": "/images/drinks/no_image_available"
   }
 
@@ -140,7 +141,11 @@ function App() {
                       </div>
                     ) : (
                       <p className="text-center py-4 text-gray-500">
-                        No recommendations found. Try a different description.
+                        <img
+                          src="/images/drinks/no_drinks_found.png"
+                          alt="No drink found"
+                          className="rounded-2xl"
+                        />
                       </p>
                     )}
                   </>
