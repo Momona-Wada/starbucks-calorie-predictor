@@ -47,6 +47,7 @@ function App() {
     "Caramel Macchiato": "/images/drinks/caramel_macchiato.png",
     "Java Chip": "/images/drinks/java_chip.png",
     "Coffee":"/images/drinks/coffee.png",
+    "Caffè Americano":"/images/drinks/americano.png",
     "No drinks found at all for these tags": "/images/drinks/no_image_available"
   }
 
